@@ -2,55 +2,48 @@
 #include <LiquidCrystal_I2C.h> 
 #include <SPI.h>
 #include <SD.h>
+#include <Vector.h>
 
-File myFile;
+#define outputA 6
+#define outputB 7
+
+int index=0;
+int count=0;
+File root;
+File current;
+Vector<String> fileContent;
 
 LiquidCrystal_I2C lcd = LiquidCrystal_I2C(0x27, 16, 2);
 
 void setup() {
+
+  String buff="";
+
   lcd.init();
   lcd.backlight();
+
+  pinMode (outputA,INPUT);
+  pinMode (outputB,INPUT);
+  
   Serial.begin(9600);
 
-    if (!SD.begin(5)) {
-      Serial.println("Error with SD Card!");
+  if (!SD.begin(5)) {
       while (1);
   }
   
-  Serial.println("SD Card pass!");
-  myFile = SD.open("suka.txt");
-    
+
+  root = SD.open("/");
+  
+  //aLastState = digitalRead(outputA);
+
 }
+
 void loop() {
-
-
-  Serial.println("In loop!");
   
-  lcd.setCursor(16, 0); //
-  Serial.println("lcd.set pass!");
+  lcd.setCursor(2, 0); //
   lcd.autoscroll(); //enable auto-scrolling
-  Serial.println("lcd.autoscroll pass!");
-  
-  if (myFile) {
-    Serial.println("if (myFile)");
-  
-      while (myFile.available()) { //execute while file is available
-
-        
-        Serial.println("myFile.available()");
-        
-        char letter = myFile.read(); //read next character from file
-        Serial.println("myFile.read();");
-        lcd.print(letter); //display character
-        Serial.print(letter);
-        delay(300);
-      }
-  
-      myFile.close(); //close file
-    }
-
+  //lcd.print(fileContent[0]);
+  //Serial.println(fileContent[0]);
+  delay(5000);
   lcd.clear();
-
-  while(1);
-  
 }
