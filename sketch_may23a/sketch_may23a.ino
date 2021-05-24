@@ -6,6 +6,7 @@
 
 #define outputA 6
 #define outputB 7
+#define interruptPin 2
 
 int index=1;
 int count=0;
@@ -13,6 +14,8 @@ int count=0;
 File root;
 File current;
 
+String buff="";
+  
 Vector<String> fileContent;
 
 int aState;
@@ -20,14 +23,27 @@ int aLastState;
 
 LiquidCrystal_I2C lcd = LiquidCrystal_I2C(0x27, 16, 2);
 
+void writeBufferToSerial()
+{
+  if(buff.length()!=0){
+    Serial.print(buff);
+    buff="";
+  }
+}
+
 void setup() {
 
 
   Serial.begin(9600);
+    
   String buff="";
 
   lcd.init();
   lcd.backlight();
+
+  pinMode (interruptPin,INPUT_PULLUP);
+  
+  attachInterrupt(digitalPinToInterrupt(interruptPin), writeBufferToSerial, FALLING  );
 
   pinMode (outputA,INPUT);
   pinMode (outputB,INPUT);
@@ -55,12 +71,11 @@ void countFiles(File dir) {
     count++;
     entry.close();
   }
-  Serial.println(count);
 }
 
 
 void loop() {
-  
+
    aState = digitalRead(outputA); // Reads the "current" state of the outputA
    // If the previous and the current state of the outputA are different, that means a Pulse has occured
    if (aState != aLastState){     
@@ -74,6 +89,7 @@ void loop() {
        if(index < 1)
         index = count-1;
      }
+     buff="";
      openNthFile(index);
    } 
    aLastState = aState; // Updates the previous state of the outputA with the current state
@@ -90,11 +106,10 @@ void openNthFile(int n)
   current = root.openNextFile();
   lcd.print(current.name());
 
-  String buff="";
   while(current.available())
   {
     buff += (char)current.read();
   }
-  Serial.println(buff);
   current.close();
+
 }
