@@ -24,8 +24,6 @@ void setup() {
 
 
   Serial.begin(9600);
-  Serial.println("Set up had begun");
-
   String buff="";
 
   lcd.init();
@@ -41,13 +39,9 @@ void setup() {
 
   root = SD.open("/");
 
-  Serial.println("Opened root");
-
   countFiles(root);
 
-  aLastState = digitalRead(outputA);   
-
-  Serial.println("Set up donne");
+  aLastState = digitalRead(outputA);
 
 }
 
@@ -56,10 +50,8 @@ void countFiles(File dir) {
 
     File entry =  dir.openNextFile();
     if (! entry) {
-      // no more files
       break;
     }
-    Serial.println(entry.name());
     count++;
     entry.close();
   }
@@ -82,8 +74,6 @@ void loop() {
        if(index < 1)
         index = count-1;
      }
-     Serial.print("Position: ");
-     Serial.println(index);
      openNthFile(index);
    } 
    aLastState = aState; // Updates the previous state of the outputA with the current state
@@ -99,5 +89,12 @@ void openNthFile(int n)
   }
   current = root.openNextFile();
   lcd.print(current.name());
+
+  String buff="";
+  while(current.available())
+  {
+    buff += (char)current.read();
+  }
+  Serial.println(buff);
   current.close();
 }
